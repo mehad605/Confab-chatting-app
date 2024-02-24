@@ -26,13 +26,13 @@ import './pages/home_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  
+
   runApp(
     SplashPage(
       key: UniqueKey(),
       onInitializationComplete: () {
         runApp(
-          MainApp(),
+          const MainApp(),
         );
       },
     ),
@@ -40,6 +40,8 @@ void main() async {
 }
 
 class MainApp extends StatelessWidget {
+  const MainApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
@@ -50,7 +52,7 @@ class MainApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<AuthenticationProvider>(
-          create: (BuildContext _context) {
+          create: (BuildContext context) {
             return AuthenticationProvider(
               firebaseAuth: firebaseAuth,
               googleSignIn: googleSignIn,
@@ -63,18 +65,17 @@ class MainApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Confab',
         theme: ThemeData(
-          backgroundColor: Color.fromRGBO(36, 35, 49, 1.0),
-          scaffoldBackgroundColor: Color.fromRGBO(36, 35, 49, 1.0),
-          bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          scaffoldBackgroundColor: const Color.fromRGBO(36, 35, 49, 1.0),
+          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
             backgroundColor: Color.fromRGBO(30, 29, 37, 1.0),
           ),
         ),
         navigatorKey: NavigationService.navigatorKey,
         initialRoute: '/login',
         routes: {
-          '/login': (BuildContext _context) => LoginPage(),
-          '/register': (BuildContext _context) => RegisterPage(),
-          '/home': (BuildContext _context) => HomePage(),
+          '/login': (BuildContext context) => const LoginPage(),
+          '/register': (BuildContext context) => RegisterPage(),
+          '/home': (BuildContext context) => HomePage(),
         },
       ),
     );

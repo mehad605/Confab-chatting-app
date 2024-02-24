@@ -134,11 +134,6 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(
               height: _deviceHeight * 0.02,
             ),
-            ortext(),
-            SizedBox(
-              height: _deviceHeight * 0.02,
-            ),
-            _googleSignInButton(),
           ],
         ),
       ),

@@ -95,5 +95,3 @@ Displays a list of all chats. Uses the Chats Page Provider to manage the state o
 ## Chat Page
 
 Displays a chat interface with a message portion at the top of the screen and a text field with an image and send button at the bottom of the screen. Uses the Chat Page Provider to manage the state of the page.
-
-# For more detailed information, please refer to our [read.md](./read.md) file.

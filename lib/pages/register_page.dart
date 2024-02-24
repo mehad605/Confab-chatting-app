@@ -1,6 +1,7 @@
 //Packages
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 
@@ -19,6 +20,8 @@ import '../widgets/rounded_image.dart';
 import '../providers/authentication_provider.dart';
 
 class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
+
   @override
   State<StatefulWidget> createState() {
     return _RegisterPageState();
@@ -38,6 +41,7 @@ class _RegisterPageState extends State<RegisterPage> {
   String? _password;
   String? _name;
   PlatformFile? _profileImage;
+  bool _isLoading = false;
 
   final _registerFormKey = GlobalKey<FormState>();
 
@@ -55,37 +59,39 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget _buildUI() {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: _deviceWidth * 0.03,
-          vertical: _deviceHeight * 0.02,
-        ),
-        height: _deviceHeight * 0.98,
-        width: _deviceWidth * 0.97,
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            _profileImageField(),
-            SizedBox(
-              height: _deviceHeight * 0.05,
+      body: _isLoading == true
+          ? const Center(child: CircularProgressIndicator())
+          : Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: _deviceWidth * 0.03,
+                vertical: _deviceHeight * 0.02,
+              ),
+              height: _deviceHeight * 0.98,
+              width: _deviceWidth * 0.97,
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _profileImageField(),
+                  SizedBox(
+                    height: _deviceHeight * 0.05,
+                  ),
+                  _registerForm(),
+                  // SizedBox(
+                  //   height: _deviceHeight * 0.05,
+                  // ),
+                  // _verifyEmailButton(),
+                  SizedBox(
+                    height: _deviceHeight * 0.05,
+                  ),
+                  _registerButton(),
+                  SizedBox(
+                    height: _deviceHeight * 0.02,
+                  ),
+                ],
+              ),
             ),
-            _registerForm(),
-            SizedBox(
-              height: _deviceHeight * 0.05,
-            ),
-            _verifyEmailButton(),
-            SizedBox(
-              height: _deviceHeight * 0.05,
-            ),
-            _registerButton(),
-            SizedBox(
-              height: _deviceHeight * 0.02,
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -93,10 +99,10 @@ class _RegisterPageState extends State<RegisterPage> {
     return GestureDetector(
       onTap: () {
         GetIt.instance.get<MediaService>().pickImageFromLibrary().then(
-          (_file) {
+          (file) {
             setState(
               () {
-                _profileImage = _file;
+                _profileImage = file;
               },
             );
           },
@@ -110,11 +116,17 @@ class _RegisterPageState extends State<RegisterPage> {
             size: _deviceHeight * 0.15,
           );
         } else {
-          return RoundedImageNetwork(
-            key: UniqueKey(),
-            imagePath:
-                "https://i.pinimg.com/736x/47/1a/1a/471a1ad342659289433e05a611d206f8--logo-php.jpg",
-            size: _deviceHeight * 0.15,
+          return Container(
+            height: 120,
+            width: 120,
+            decoration: const BoxDecoration(
+                color: Colors.black26, shape: BoxShape.circle),
+            child: const Center(
+              child: Text(
+                "Select Image",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
           );
         }
       }(),
@@ -122,7 +134,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Widget _registerForm() {
-    return Container(
+    return SizedBox(
       height: _deviceHeight * 0.35,
       child: Form(
         key: _registerFormKey,
@@ -132,18 +144,18 @@ class _RegisterPageState extends State<RegisterPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             CustomTextFormField(
-                onSaved: (_value) {
+                onSaved: (value) {
                   setState(() {
-                    _name = _value;
+                    _name = value;
                   });
                 },
                 regEx: r'.{6,}',
                 hintText: "Name",
                 obscureText: false),
             CustomTextFormField(
-                onSaved: (_value) {
+                onSaved: (value) {
                   setState(() {
-                    _email = _value;
+                    _email = value;
                   });
                 },
                 regEx:
@@ -151,9 +163,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 hintText: "Email",
                 obscureText: false),
             CustomTextFormField(
-                onSaved: (_value) {
+                onSaved: (value) {
                   setState(() {
-                    _password = _value;
+                    _password = value;
                   });
                 },
                 regEx: r".{8,}",
@@ -173,83 +185,92 @@ class _RegisterPageState extends State<RegisterPage> {
       onPressed: () async {
         if (_registerFormKey.currentState!.validate() &&
             _profileImage != null) {
+          setState(() {
+            _isLoading = true;
+          });
           _registerFormKey.currentState!.save();
-          String? _uid = await _auth.registerUserUsingEmailAndPassword(
+          String? uid = await _auth.registerUserUsingEmailAndPassword(
               _email!, _password!);
-          String? _imageURL =
-              await _cloudStorage.saveUserImageToStorage(_uid!, _profileImage!);
+          String? imageURL =
+              await _cloudStorage.saveUserImageToStorage(uid!, _profileImage!);
           await _auth.sendEmailVerification();
-          await _db.createUser(_uid, _email!, _name!, _imageURL!);
+          await _db.createUser(uid, _email!, _name!, imageURL!);
           await _auth.logout();
           await _auth.loginUsingEmailAndPassword(_email!, _password!);
+          setState(() {
+            _isLoading = false;
+          });
+        } else if (!_registerFormKey.currentState!.validate()) {
+          Fluttertoast.showToast(msg: 'Please fill all the details');
+        } else {
+          Fluttertoast.showToast(msg: 'Image must be provided');
         }
       },
     );
   }
 
- Widget _verifyEmailButton() {
-  return Container(
-    height: _deviceHeight * 0.065,
-    width: _deviceWidth * 0.65,
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(15), // Adjust the radius as needed
-      color: Color.fromARGB(255, 174, 0, 255), // Replace with your desired button color
-    ),
-    child: ElevatedButton(
-      onPressed: () async {
-        try {
-          // Send email verification
-          await _auth.sendEmailVerification();
+  // Widget _verifyEmailButton() {
+  //   return Container(
+  //     height: _deviceHeight * 0.065,
+  //     width: _deviceWidth * 0.65,
+  //     decoration: BoxDecoration(
+  //       borderRadius: BorderRadius.circular(15), // Adjust the radius as needed
+  //       color: const Color.fromARGB(
+  //           255, 174, 0, 255), // Replace with your desired button color
+  //     ),
+  //     child: ElevatedButton(
+  //       onPressed: () async {
+  //         try {
+  //           // Send email verification
+  //           await _auth.sendEmailVerification();
 
-          // Show a message to the user
-          _showEmailVerificationMessage();
-        } catch (e) {
-          print("Error sending email verification: $e");
-        }
-      },
-      child: Text(
-        "Verify Email",
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      ),
-      style: ButtonStyle(
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15), // Same radius as the container
-          ),
-        ),
-        backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
-        elevation: MaterialStateProperty.all<double>(0), // No shadow
-      ),
-    ),
-  );
-}
+  //           // Show a message to the user
+  //           _showEmailVerificationMessage();
+  //         } catch (e) {
+  //           print("Error sending email verification: $e");
+  //         }
+  //       },
+  //       style: ButtonStyle(
+  //         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+  //           RoundedRectangleBorder(
+  //             borderRadius:
+  //                 BorderRadius.circular(15), // Same radius as the container
+  //           ),
+  //         ),
+  //         backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
+  //         elevation: MaterialStateProperty.all<double>(0), // No shadow
+  //       ),
+  //       child: const Text(
+  //         "Verify Email",
+  //         style: TextStyle(
+  //           fontSize: 16,
+  //           fontWeight: FontWeight.bold,
+  //           color: Colors.white,
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
-
-  void _showEmailVerificationMessage() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Email Verification'),
-          content: Text(
-            'A verification email has been sent. Please check your email and verify your account.',
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  
+  // void _showEmailVerificationMessage() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: const Text('Email Verification'),
+  //         content: const Text(
+  //           'A verification email has been sent. Please check your email and verify your account.',
+  //         ),
+  //         actions: <Widget>[
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //             },
+  //             child: const Text('OK'),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 }
