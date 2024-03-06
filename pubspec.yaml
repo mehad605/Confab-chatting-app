@@ -25,6 +25,7 @@ dependencies:
   google_sign_in: ^6.1.1
   firebase_messaging: ^14.7.4
   fluttertoast: ^8.2.4
+  pod_player: ^0.2.1
 
   cupertino_icons: ^1.0.2
 

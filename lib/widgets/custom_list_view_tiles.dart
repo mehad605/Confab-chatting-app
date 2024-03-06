@@ -19,7 +19,8 @@ class CustomListViewTile extends StatelessWidget {
   final bool isSelected;
   final Function onTap;
 
-  CustomListViewTile({
+  const CustomListViewTile({
+    super.key,
     required this.height,
     required this.title,
     required this.subtitle,
@@ -32,7 +33,8 @@ class CustomListViewTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      trailing: isSelected ? Icon(Icons.check, color: Colors.white) : null,
+      trailing:
+          isSelected ? const Icon(Icons.check, color: Colors.white) : null,
       onTap: () => onTap(),
       minVerticalPadding: height * 0.20,
       leading: RoundedImageNetworkWithStatusIndicator(
@@ -43,7 +45,7 @@ class CustomListViewTile extends StatelessWidget {
       ),
       title: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 18,
           fontWeight: FontWeight.w500,
@@ -51,7 +53,7 @@ class CustomListViewTile extends StatelessWidget {
       ),
       subtitle: Text(
         subtitle,
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.white54,
           fontSize: 12,
           fontWeight: FontWeight.w400,
@@ -70,7 +72,8 @@ class CustomListViewTileWithActivity extends StatelessWidget {
   final bool isActivity;
   final Function onTap;
 
-  CustomListViewTileWithActivity({
+  const CustomListViewTileWithActivity({
+    super.key,
     required this.height,
     required this.title,
     required this.subtitle,
@@ -93,7 +96,7 @@ class CustomListViewTileWithActivity extends StatelessWidget {
       ),
       title: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 18,
           fontWeight: FontWeight.w500,
@@ -113,7 +116,7 @@ class CustomListViewTileWithActivity extends StatelessWidget {
             )
           : Text(
               subtitle,
-              style: TextStyle(
+              style: const TextStyle(
                   color: Colors.white54,
                   fontSize: 12,
                   fontWeight: FontWeight.w400),
@@ -129,7 +132,8 @@ class CustomChatListViewTile extends StatelessWidget {
   final ChatMessage message;
   final ChatUser sender;
 
-  CustomChatListViewTile({
+  const CustomChatListViewTile({
+    super.key,
     required this.width,
     required this.deviceHeight,
     required this.isOwnMessage,
@@ -140,7 +144,7 @@ class CustomChatListViewTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 10),
       width: width,
       child: Row(
         mainAxisSize: MainAxisSize.max,
@@ -164,12 +168,19 @@ class CustomChatListViewTile extends StatelessWidget {
                   height: deviceHeight * 0.06,
                   width: width,
                 )
-              : ImageMessageBubble(
-                  isOwnMessage: isOwnMessage,
-                  message: message,
-                  height: deviceHeight * 0.30,
-                  width: width * 0.55,
-                ),
+              : (message.type == MessageType.VIDEO)
+                  ? VideoMessageBubble(
+                      isOwnMessage: isOwnMessage,
+                      message: message,
+                      height: deviceHeight * 0.30,
+                      width: width * 0.55,
+                    )
+                  : ImageMessageBubble(
+                      isOwnMessage: isOwnMessage,
+                      message: message,
+                      height: 160,
+                      width: width * 0.55,
+                    ),
         ],
       ),
     );

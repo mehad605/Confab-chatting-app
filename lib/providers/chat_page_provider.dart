@@ -129,6 +129,26 @@ class ChatPageProvider extends ChangeNotifier {
     }
   }
 
+  void sendVideoMessage() async {
+    try {
+      PlatformFile? _file = await _media.pickVideoFromLibrary();
+      if (_file != null) {
+        String? _downloadURL = await _storage.saveChatVideoToStorage(
+            _chatId, _auth.user.uid, _file);
+        ChatMessage _messageToSend = ChatMessage(
+          content: _downloadURL!,
+          type: MessageType.VIDEO,
+          senderID: _auth.user.uid,
+          sentTime: DateTime.now(),
+        );
+        _db.addMessageToChat(_chatId, _messageToSend);
+      }
+    } catch (e) {
+      print("Error sending video message.");
+      print(e);
+    }
+  }
+
   void deleteChat() {
     goBack();
     _db.deleteChat(_chatId);

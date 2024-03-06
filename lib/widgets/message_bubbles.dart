@@ -1,4 +1,6 @@
+import 'package:confab/widgets/video_player.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 //Packages
 import 'package:timeago/timeago.dart' as timeago;
@@ -12,29 +14,33 @@ class TextMessageBubble extends StatelessWidget {
   final double height;
   final double width;
 
-  TextMessageBubble(
-      {required this.isOwnMessage,
+  const TextMessageBubble(
+      {super.key,
+      required this.isOwnMessage,
       required this.message,
       required this.height,
       required this.width});
 
   @override
   Widget build(BuildContext context) {
-    List<Color> _colorScheme = isOwnMessage
-        ? [Color.fromRGBO(108, 0, 249, 1), Color.fromRGBO(144, 60, 255, 1)]
+    List<Color> colorScheme = isOwnMessage
+        ? [
+            const Color.fromARGB(255, 99, 103, 145),
+            const Color.fromARGB(255, 99, 103, 145)
+          ]
         : [
-            Color.fromRGBO(51, 49, 68, 1.0),
-            Color.fromRGBO(51, 49, 68, 1.0),
+            const Color.fromRGBO(51, 49, 68, 1.0),
+            const Color.fromRGBO(51, 49, 68, 1.0),
           ];
     return Container(
       height: height + (message.content.length / 20 * 6.0),
       width: width,
-      padding: EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         gradient: LinearGradient(
-          colors: _colorScheme,
-          stops: [0.30, 0.70],
+          colors: colorScheme,
+          stops: const [0.30, 0.70],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
@@ -46,13 +52,13 @@ class TextMessageBubble extends StatelessWidget {
         children: [
           Text(
             message.content,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
             ),
           ),
           Text(
             timeago.format(message.sentTime),
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white70,
             ),
           ),
@@ -68,23 +74,27 @@ class ImageMessageBubble extends StatelessWidget {
   final double height;
   final double width;
 
-  ImageMessageBubble(
-      {required this.isOwnMessage,
+  const ImageMessageBubble(
+      {super.key,
+      required this.isOwnMessage,
       required this.message,
       required this.height,
       required this.width});
 
   @override
   Widget build(BuildContext context) {
-    List<Color> _colorScheme = isOwnMessage
-        ? [Color.fromRGBO(108, 0, 249, 1), Color.fromRGBO(144, 60, 255, 1)]
+    List<Color> colorScheme = isOwnMessage
+        ? [
+            const Color.fromARGB(255, 99, 103, 145),
+            const Color.fromARGB(255, 99, 103, 145)
+          ]
         : [
-            Color.fromRGBO(51, 49, 68, 1.0),
-            Color.fromRGBO(51, 49, 68, 1.0),
+            const Color.fromRGBO(51, 49, 68, 1.0),
+            const Color.fromRGBO(51, 49, 68, 1.0),
           ];
-    DecorationImage _image = DecorationImage(
+    DecorationImage image = DecorationImage(
       image: NetworkImage(message.content),
-      fit: BoxFit.cover,
+      fit: BoxFit.fitWidth,
     );
     return Container(
       padding: EdgeInsets.symmetric(
@@ -94,14 +104,13 @@ class ImageMessageBubble extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
         gradient: LinearGradient(
-          colors: _colorScheme,
-          stops: [0.30, 0.70],
+          colors: colorScheme,
+          stops: const [0.30, 0.70],
           begin: Alignment.bottomLeft,
           end: Alignment.topRight,
         ),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -110,18 +119,80 @@ class ImageMessageBubble extends StatelessWidget {
             width: width,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15),
-              image: _image,
+              image: image,
             ),
           ),
-          SizedBox(height: height * 0.02),
           Text(
             timeago.format(message.sentTime),
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white70,
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class VideoMessageBubble extends StatelessWidget {
+  final bool isOwnMessage;
+  final ChatMessage message;
+  final double height;
+  final double width;
+
+  const VideoMessageBubble(
+      {super.key,
+      required this.isOwnMessage,
+      required this.message,
+      required this.height,
+      required this.width});
+
+  @override
+  Widget build(BuildContext context) {
+    List<Color> colorScheme = isOwnMessage
+        ? [
+            const Color.fromARGB(255, 99, 103, 145),
+            const Color.fromARGB(255, 99, 103, 145)
+          ]
+        : [
+            const Color.fromRGBO(51, 49, 68, 1.0),
+            const Color.fromRGBO(51, 49, 68, 1.0),
+          ];
+    DecorationImage image = DecorationImage(
+      image: NetworkImage(message.content),
+    );
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  PlayVideoFromNetwork(videoUrl: message.content)),
+        );
+      },
+      child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: width * 0.02,
+            vertical: height * 0.03,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            gradient: LinearGradient(
+              colors: colorScheme,
+              stops: const [0.30, 0.70],
+              begin: Alignment.bottomLeft,
+              end: Alignment.topRight,
+            ),
+          ),
+          child: const Column(
+            children: [
+              Icon(Icons.play_arrow),
+              SizedBox(
+                height: 10,
+              ),
+              Text('Tap to watch video...')
+            ],
+          )),
     );
   }
 }

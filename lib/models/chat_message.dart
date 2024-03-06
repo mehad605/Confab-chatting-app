@@ -4,6 +4,7 @@ enum MessageType {
   TEXT,
   IMAGE,
   UNKNOWN,
+  VIDEO,
 }
 
 class ChatMessage {
@@ -27,6 +28,9 @@ class ChatMessage {
       case "image":
         _messageType = MessageType.IMAGE;
         break;
+        case "video":
+        _messageType = MessageType.VIDEO;
+        break;
       default:
         _messageType = MessageType.UNKNOWN;
     }
@@ -46,6 +50,9 @@ class ChatMessage {
         break;
       case MessageType.IMAGE:
         _messageType = "image";
+        break;
+      case MessageType.VIDEO:
+        _messageType = "video";
         break;
       default:
         _messageType = "";

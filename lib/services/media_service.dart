@@ -11,4 +11,13 @@ class MediaService {
     }
     return null;
   }
+
+  Future<PlatformFile?> pickVideoFromLibrary() async {
+    FilePickerResult? _result =
+        await FilePicker.platform.pickFiles(type: FileType.video);
+    if (_result != null) {
+      return _result.files[0];
+    }
+    return null;
+  }
 }
