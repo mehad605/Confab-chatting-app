@@ -11,8 +11,9 @@ import '../widgets/custom_input_fields.dart';
 import '../models/chat.dart';
 import '../models/chat_message.dart';
 
-//Providers
+//Providers g
 import '../providers/authentication_provider.dart';
+i
 import '../providers/chat_page_provider.dart';
 
 class ChatPage extends StatefulWidget {
