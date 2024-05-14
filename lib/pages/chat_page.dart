@@ -13,7 +13,6 @@ import '../models/chat_message.dart';
 
 //Providers g
 import '../providers/authentication_provider.dart';
-i
 import '../providers/chat_page_provider.dart';
 
 class ChatPage extends StatefulWidget {
